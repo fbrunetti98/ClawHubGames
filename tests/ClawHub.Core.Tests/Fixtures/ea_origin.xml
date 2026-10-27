@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DiPManifest version="4.0">
+  <gameTitles>
+    <gameTitle locale="it_IT">Titanfall 2 IT</gameTitle>
+    <gameTitle locale="en_US">Titanfall 2</gameTitle>
+  </gameTitles>
+  <contentIDs>
+    <contentID>1063865</contentID>
+    <contentID>1063866</contentID>
+  </contentIDs>
+  <runtime>
+    <launcher>
+      <filePath>[HKEY_LOCAL_MACHINE\SOFTWARE\Respawn\Titanfall2\Install Dir]Titanfall2.exe</filePath>
+    </launcher>
+  </runtime>
+</DiPManifest>

@@ -1,0 +1,57 @@
+name: Release
+
+# Si avvia creando un tag di versione, es.:
+#   git tag v0.1.0 && git push origin v0.1.0
+# Un tag con trattino (v0.2.0-beta.1) diventa una pre-release.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          # Version di .NET accetta solo la parte numerica; quella completa va in InformationalVersion.
+          $numeric = $version.Split('-')[0]
+          "full=$version" >> $env:GITHUB_OUTPUT
+          "numeric=$numeric" >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: dotnet test --project tests/ClawHub.Core.Tests -c Release
+
+      - name: Publish
+        shell: pwsh
+        run: |
+          $full = "${{ steps.version.outputs.full }}"
+          $numeric = "${{ steps.version.outputs.numeric }}"
+          foreach ($arch in @('x64', 'ARM64')) {
+            $rid = "win-$($arch.ToLower())"
+            dotnet publish src/ClawHub.App -c Release -r $rid -p:Platform=$arch `
+              -p:Version=$numeric -p:InformationalVersion=$full -o "publish/$rid"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            Compress-Archive -Path "publish/$rid/*" -DestinationPath "ClawHubGames-$full-$rid.zip"
+          }
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $flags = @('--generate-notes', '--title', "Claw Hub Games $tag")
+          if ($tag.Contains('-')) { $flags += '--prerelease' }
+          gh release create $tag (Get-ChildItem ClawHubGames-*.zip).FullName @flags

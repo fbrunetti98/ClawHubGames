@@ -1,0 +1,12 @@
+{
+	"FormatVersion": 0,
+	"bIsIncompleteInstall": false,
+	"LaunchExecutable": "HadesII.exe",
+	"DisplayName": "Hades II",
+	"InstallLocation": "C:\\Program Files\\Epic Games\\HadesII",
+	"CatalogNamespace": "ns123",
+	"CatalogItemId": "item456",
+	"AppName": "Hades2",
+	"MainGameAppName": "Hades2",
+	"AppCategories": [ "public", "games", "applications" ]
+}

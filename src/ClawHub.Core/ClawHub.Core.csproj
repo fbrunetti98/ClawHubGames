@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Logica indipendente dalla piattaforma: modelli, parser, servizi. Testabile anche fuori da Windows. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ClawHub.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\Strings\*.json" LogicalName="ClawHub.Strings.%(Filename).json" />
+  </ItemGroup>
+
+</Project>

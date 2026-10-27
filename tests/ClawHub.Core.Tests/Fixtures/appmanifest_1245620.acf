@@ -1,0 +1,15 @@
+"AppState"
+{
+	"appid"		"1245620"
+	"universe"		"1"
+	"name"		"ELDEN RING"
+	"StateFlags"		"4"
+	"installdir"		"ELDEN RING"
+	"LastUpdated"		"1700000000"
+	"LastPlayed"		"1730000000"
+	// commento che il parser deve ignorare
+	"UserConfig"
+	{
+		"language"		"italian"
+	}
+}

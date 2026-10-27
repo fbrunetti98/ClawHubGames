@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Test
+        run: dotnet test --project tests/ClawHub.Core.Tests -c Release
+
+      - name: Build app (x64)
+        run: dotnet build src/ClawHub.App -c Release -r win-x64 -p:Platform=x64

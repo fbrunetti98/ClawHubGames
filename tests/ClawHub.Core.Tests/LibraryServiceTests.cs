@@ -1,0 +1,168 @@
+using ClawHub.Core.Abstractions;
+using ClawHub.Core.Models;
+using ClawHub.Core.Services;
+using ClawHub.Core.Storage;
+
+namespace ClawHub.Core.Tests;
+
+public sealed class LibraryServiceTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "clawhub-tests-" + Guid.NewGuid().ToString("N"));
+    private readonly FakeProvider _steam = new(GameStore.Steam, Game("1", "Half-Life 2"), Game("2", "Pokémon Legends"));
+    private readonly FakeProvider _epic = new(GameStore.Epic, Game("a", "Alan Wake 2", GameStore.Epic));
+
+    private string LibraryFile => Path.Combine(_dir, "library.json");
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+            Directory.Delete(_dir, recursive: true);
+    }
+
+    private LibraryService CreateService() =>
+        new([_steam, _epic], new JsonFileStore<UserLibrary>(LibraryFile));
+
+    private static DetectedGame Game(string id, string name, GameStore store = GameStore.Steam) => new()
+    {
+        Store = store,
+        StoreId = id,
+        Name = name,
+        Launch = LaunchInfo.FromUri($"test://{id}"),
+    };
+
+    [Fact]
+    public async Task Scan_MergesAllProviders()
+    {
+        var service = CreateService();
+
+        var report = await service.ScanAsync();
+
+        Assert.Equal(3, report.GameCount);
+        Assert.Empty(report.Errors);
+    }
+
+    [Fact]
+    public async Task Scan_SkipsDisabledStores()
+    {
+        var service = CreateService();
+
+        await service.ScanAsync(new HashSet<GameStore> { GameStore.Epic });
+
+        Assert.All(service.Games, g => Assert.Equal(GameStore.Steam, g.Store));
+    }
+
+    [Fact]
+    public async Task Scan_KeepsPreviousGamesWhenAStoreFails()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+
+        _epic.Fail = true;
+        var report = await service.ScanAsync();
+
+        Assert.Single(report.Errors);
+        Assert.Contains(service.Games, g => g.Name == "Alan Wake 2");
+    }
+
+    [Fact]
+    public async Task Search_IgnoresCaseAccentsAndPunctuation()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+
+        Assert.Equal("Pokémon Legends", Assert.Single(service.Query(new LibraryQuery { Search = "pokemon" })).Name);
+        Assert.Equal("Half-Life 2", Assert.Single(service.Query(new LibraryQuery { Search = "halflife" })).Name);
+        Assert.Equal("Alan Wake 2", Assert.Single(service.Query(new LibraryQuery { Search = "wake ALAN" })).Name);
+    }
+
+    [Fact]
+    public async Task UserData_SurvivesRescanAndRestart()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        var collection = await service.CreateCollectionAsync("Soulslike");
+        await service.SetFavoriteAsync("steam:1", true);
+        await service.AddToCollectionAsync("epic:a", collection.Id);
+        await service.ScanAsync();
+
+        var restarted = CreateService();
+        await restarted.LoadAsync();
+
+        Assert.Equal(["Half-Life 2"], restarted.Query(new LibraryQuery { FavoritesOnly = true }).Select(g => g.Name));
+        Assert.Equal(["Alan Wake 2"], restarted.Query(new LibraryQuery { CollectionId = collection.Id }).Select(g => g.Name));
+        Assert.Equal("Soulslike", Assert.Single(restarted.Collections).Name);
+    }
+
+    [Fact]
+    public async Task DeleteCollection_RemovesItFromGames()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        var collection = await service.CreateCollectionAsync("Da finire");
+        await service.AddToCollectionAsync("steam:2", collection.Id);
+
+        await service.DeleteCollectionAsync(collection.Id);
+
+        Assert.Empty(service.Collections);
+        Assert.Empty(service.Find("steam:2")!.CollectionIds);
+    }
+
+    [Fact]
+    public async Task HiddenGames_AreExcludedUnlessRequested()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        await service.SetHiddenAsync("steam:2", true);
+
+        Assert.DoesNotContain(service.Query(LibraryQuery.All), g => g.Id == "steam:2");
+        Assert.Contains(service.Query(new LibraryQuery { IncludeHidden = true }), g => g.Id == "steam:2");
+    }
+
+    [Fact]
+    public async Task ManualGames_AreAddedAndRemoved()
+    {
+        var service = CreateService();
+        var game = await service.AddManualGameAsync("RetroArch", @"C:\RetroArch\retroarch.exe", "-f");
+
+        Assert.Equal(GameStore.Manual, game.Store);
+        Assert.Equal(LaunchKind.Executable, game.Source.Launch.Kind);
+        Assert.Equal("-f", game.Source.Launch.Arguments);
+
+        await service.RemoveManualGameAsync(game.Id);
+        Assert.Null(service.Find(game.Id));
+    }
+
+    [Fact]
+    public async Task RecentSort_UsesLaunchHistory()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        await service.RecordLaunchAsync("epic:a", DateTimeOffset.Now.AddDays(-1));
+        await service.RecordLaunchAsync("steam:2", DateTimeOffset.Now);
+
+        var names = service.Query(new LibraryQuery { Sort = LibrarySort.LastPlayed }).Select(g => g.Name).ToList();
+
+        Assert.Equal(["Pokémon Legends", "Alan Wake 2", "Half-Life 2"], names);
+    }
+
+    [Fact]
+    public async Task GroupByStore_FollowsStoreOrder()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+
+        var groups = LibraryService.GroupByStore(service.Query(LibraryQuery.All));
+
+        Assert.Equal([GameStore.Steam, GameStore.Epic], groups.Select(g => g.Key));
+    }
+
+    private sealed class FakeProvider(GameStore store, params DetectedGame[] games) : ILibraryProvider
+    {
+        public bool Fail { get; set; }
+        public GameStore Store => store;
+        public bool IsAvailable() => true;
+
+        public Task<IReadOnlyList<DetectedGame>> GetInstalledGamesAsync(CancellationToken cancellationToken = default) =>
+            Fail ? throw new IOException("boom") : Task.FromResult<IReadOnlyList<DetectedGame>>(games);
+    }
+}

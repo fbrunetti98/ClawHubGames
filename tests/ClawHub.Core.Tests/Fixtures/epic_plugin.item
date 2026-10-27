@@ -1,0 +1,8 @@
+{
+	"bIsIncompleteInstall": false,
+	"DisplayName": "Some UE Plugin",
+	"InstallLocation": "C:\\UE\\Plugins\\X",
+	"AppName": "PluginX",
+	"MainGameAppName": "PluginX",
+	"AppCategories": [ "plugins", "engines" ]
+}
