@@ -18,5 +18,9 @@ jobs:
       - name: Test
         run: dotnet test --project tests/ClawHub.Core.Tests -c Release
 
-      - name: Build app (x64)
-        run: dotnet build src/ClawHub.App -c Release -r win-x64 -p:Platform=x64
+      - name: Publish app (x64)
+        run: dotnet publish src/ClawHub.App -c Release -r win-x64 -p:Platform=x64 -o publish/win-x64
+
+      - name: Check published files
+        shell: pwsh
+        run: .github/scripts/Test-PublishOutput.ps1 -Path publish/win-x64

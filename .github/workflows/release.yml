@@ -43,6 +43,8 @@ jobs:
             dotnet publish src/ClawHub.App -c Release -r $rid -p:Platform=$arch `
               -p:Version=$numeric -p:InformationalVersion=$full -o "publish/$rid"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            .github/scripts/Test-PublishOutput.ps1 -Path "publish/$rid"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             Compress-Archive -Path "publish/$rid/*" -DestinationPath "ClawHubGames-$full-$rid.zip"
           }
 
