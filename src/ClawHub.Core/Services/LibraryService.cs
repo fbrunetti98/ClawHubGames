@@ -77,6 +77,7 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
                 .GroupBy(g => g.Id)
                 .Select(g => g.First())
                 .ToList();
+            detected = RemoveSameFolderDuplicates(detected);
             _library = _library with { LastScan = detected };
             Rebuild();
             count = _games.Count;
@@ -84,6 +85,18 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
 
         await SaveAndNotifyAsync(cancellationToken);
         return new ScanReport(count, errors);
+    }
+
+    /// <summary>
+    /// Alcuni giochi vengono trovati da due store nella stessa cartella (es. Titanfall 2 su Steam contiene ancora
+    /// l'installer EA). Vince il primo provider registrato, cioè lo store da cui il gioco è stato installato davvero.
+    /// </summary>
+    private static List<DetectedGame> RemoveSameFolderDuplicates(List<DetectedGame> games)
+    {
+        var seenFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        return games.Where(g => string.IsNullOrWhiteSpace(g.InstallDirectory)
+                                || seenFolders.Add(g.InstallDirectory.Replace('/', '\\').TrimEnd('\\')))
+            .ToList();
     }
 
     public IReadOnlyList<Game> Query(LibraryQuery query)

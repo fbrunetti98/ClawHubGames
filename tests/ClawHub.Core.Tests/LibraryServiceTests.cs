@@ -42,6 +42,19 @@ public sealed class LibraryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Scan_KeepsOnlyTheFirstStoreForTheSameFolder()
+    {
+        var steam = new FakeProvider(GameStore.Steam, Game("1237970", "Titanfall® 2") with { InstallDirectory = @"D:\SteamLibrary\steamapps\common\Titanfall2" });
+        var ea = new FakeProvider(GameStore.Ea, Game("OFB-EAST:1234", "Titanfall® 2", GameStore.Ea) with { InstallDirectory = @"d:\steamlibrary\steamapps\common\Titanfall2\" });
+        var service = new LibraryService([steam, ea], new JsonFileStore<UserLibrary>(LibraryFile));
+
+        await service.ScanAsync();
+
+        var game = Assert.Single(service.Games);
+        Assert.Equal(GameStore.Steam, game.Store);
+    }
+
+    [Fact]
     public async Task Scan_SkipsDisabledStores()
     {
         var service = CreateService();
