@@ -119,4 +119,20 @@ public class ParserTests
     {
         Assert.Equal(expected, BattleNetProducts.FindCode(name));
     }
+
+    [Theory]
+    [InlineData("\"C:\\Program Files\\Rockstar Games\\Launcher\\uninstall.exe\" -uninstall=gta5_gen9", "gta5_gen9")]
+    [InlineData("\"C:\\Program Files\\Rockstar Games\\Launcher\\Launcher.exe\" -enableFullMode -uninstall=gta5", "gta5")]
+    [InlineData("\"C:\\Program Files\\Steam\\steam.exe\" steam://uninstall/271590", null)]
+    [InlineData(null, null)]
+    public void Rockstar_FindsTitleIdInUninstallString(string? uninstallString, string? expected)
+    {
+        Assert.Equal(expected, RockstarTitles.FindTitleId(uninstallString));
+    }
+
+    [Fact]
+    public void Rockstar_LaunchArgumentsDropTrailingSlash()
+    {
+        Assert.Equal("-launchTitleInFolder \"C:\\Games\\GTA V Enhanced\"", RockstarTitles.LaunchArguments("\"C:\\Games\\GTA V Enhanced\\\""));
+    }
 }

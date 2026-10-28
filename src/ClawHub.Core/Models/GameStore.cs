@@ -10,5 +10,6 @@ public enum GameStore
     Ea,
     Ubisoft,
     BattleNet,
+    Rockstar,
     Manual,
 }

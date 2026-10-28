@@ -3,7 +3,7 @@
 ## Milestone 1 — Fondamenta ✅
 - Struttura della soluzione, CI e release automatiche da tag
 - Lettura dei giochi installati: Steam, Epic, GOG, Xbox/Game Pass, Ubisoft Connect
-- EA app e Battle.net (sperimentali: da verificare su dispositivi reali)
+- EA app, Battle.net e Rockstar Games (sperimentali: da verificare su dispositivi reali)
 - Giochi aggiunti a mano (eseguibili, emulatori)
 - Preferiti, collezioni personalizzate, giochi nascosti, ricerca, raggruppamento per store
 - Copertine: cache di Steam / CDN Steam, SteamGridDB con chiave dell'utente

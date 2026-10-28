@@ -7,7 +7,7 @@ pensato per essere usato con il controller.
 
 ## Cosa fa
 
-- Raccoglie in un'unica libreria i giochi di **Steam, Epic Games, GOG, Xbox / Game Pass, Ubisoft Connect, EA app e Battle.net**
+- Raccoglie in un'unica libreria i giochi di **Steam, Epic Games, GOG, Xbox / Game Pass, Ubisoft Connect, EA app, Battle.net e Rockstar Games**
 - Permette di aggiungere a mano qualsiasi eseguibile o emulatore
 - Ricerca, preferiti, collezioni personalizzate, raggruppamento per store
 - Copertine da Steam e, con la tua chiave gratuita, da [SteamGridDB](https://www.steamgriddb.com/)
@@ -42,6 +42,6 @@ Dettagli in [docs/ARCHITETTURA.md](docs/ARCHITETTURA.md), rilasci in [docs/RELEA
 ## English
 
 Claw Hub Games is a controller-friendly launcher that gathers the installed games from Steam, Epic, GOG,
-Xbox / Game Pass, Ubisoft Connect, EA app and Battle.net on Windows handheld PCs, plus any game you add by hand.
+Xbox / Game Pass, Ubisoft Connect, EA app, Battle.net and Rockstar Games on Windows handheld PCs, plus any game you add by hand.
 It has search, favorites, custom collections, and artwork from Steam and SteamGridDB. The interface is available in
 Italian and English. Download the latest release, extract it and run `ClawHubGames.exe`. MIT licensed.

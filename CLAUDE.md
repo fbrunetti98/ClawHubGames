@@ -18,7 +18,7 @@ niente copie dell'interfaccia o degli asset di Steam.
 Decisioni prese:
 - **Solo launcher** (libreria + avvio). TDP, ventole, LED e controller restano a [ClawTweaks](https://github.com/enterTheVoidCode/ClawTweaks).
   Non copiare codice da ClawTweaks: è AGPLv3 e renderebbe AGPL anche questo progetto.
-- **Fase 1:** giochi installati + aggiunta manuale, per tutti gli store: Steam, Epic, GOG, Xbox/Game Pass, EA app, Ubisoft Connect, Battle.net.
+- **Fase 1:** giochi installati + aggiunta manuale, per tutti gli store: Steam, Epic, GOG, Xbox/Game Pass, EA app, Ubisoft Connect, Battle.net, Rockstar Games.
   I giochi posseduti ma non installati (con login agli store) sono la **fase 2**.
 - Funzioni richieste: ricerca, preferiti, collezioni personalizzate, pagina di dettaglio del gioco, raggruppamento per store.
 - Il launcher **resta in background** mentre si gioca e si richiama con il **tasto MSI**: ClawTweaks può avviare un eseguibile,
@@ -45,4 +45,4 @@ Lo stato e i prossimi passi sono in [ROADMAP.md](ROADMAP.md), la struttura del c
 ## Ambiente di Fabio
 
 Sviluppa su Mac, compila su un PC Windows e prova tutto su un MSI Claw 8 AI+.
-EA app e Battle.net sono sperimentali: vanno verificati sul dispositivo reale.
+EA app, Battle.net e Rockstar Games sono sperimentali: vanno verificati sul dispositivo reale.

@@ -15,5 +15,6 @@ public static class LibraryProviders
         new EaProvider(),
         new UbisoftProvider(),
         new BattleNetProvider(),
+        new RockstarProvider(),
     ];
 }

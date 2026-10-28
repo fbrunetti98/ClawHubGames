@@ -5,13 +5,13 @@ src/
   ClawHub.Core        net10.0, nessuna dipendenza da Windows → testabile ovunque
     Models/           Game, DetectedGame, LaunchInfo, ArtworkSet, UserLibrary, AppSettings
     Abstractions/     ILibraryProvider (uno per store), IGameLauncher
-    Parsing/          VDF/ACF di Steam, manifest Epic, installerdata.xml EA, codici Battle.net
+    Parsing/          VDF/ACF di Steam, manifest Epic, installerdata.xml EA, codici Battle.net, title ID Rockstar
     Services/         LibraryService (unione store + dati utente), ricerca
     Artwork/          ArtworkService (cache locale), client SteamGridDB
     Localization/     Localizer + Strings/it.json, Strings/en.json
     Storage/          JsonFileStore (scrittura atomica), AppPaths
   ClawHub.Providers   net10.0-windows: registro, file system, PackageManager
-    Stores/           Steam, Epic, GOG, Xbox, EA, Ubisoft, Battle.net
+    Stores/           Steam, Epic, GOG, Xbox, EA, Ubisoft, Battle.net, Rockstar
     Infrastructure/   RegistryReader, ShellGameLauncher
   ClawHub.App         WinUI 3 non pacchettizzata e autosufficiente
 tests/
@@ -29,6 +29,7 @@ tests/
 | Ubisoft Connect | `HKLM\SOFTWARE\WOW6432Node\Ubisoft\Launcher\Installs` | `uplay://launch/<id>/0` |
 | EA app *(sperimentale)* | `__Installer\installerdata.xml` nelle cartelle dei giochi | `origin2://game/launch?offerIds=…` o eseguibile |
 | Battle.net *(sperimentale)* | voci di disinstallazione "Blizzard Entertainment" | `Battle.net.exe --exec="launch <codice>"` |
+| Rockstar Games *(sperimentale)* | voci di disinstallazione con `-uninstall=<titleId>` | `Launcher.exe -launchTitleInFolder "<cartella>"` |
 | Manuale | `library.json` | eseguibile + argomenti |
 
 ## Dati dell'utente

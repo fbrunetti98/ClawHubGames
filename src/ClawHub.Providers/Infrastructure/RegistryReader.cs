@@ -8,7 +8,8 @@ public sealed record UninstallEntry(
     string? DisplayName,
     string? Publisher,
     string? InstallLocation,
-    string? DisplayIcon);
+    string? DisplayIcon,
+    string? UninstallString);
 
 internal static class RegistryReader
 {
@@ -63,7 +64,8 @@ internal static class RegistryReader
                 key.GetValue("DisplayName") as string,
                 key.GetValue("Publisher") as string,
                 key.GetValue("InstallLocation") as string,
-                key.GetValue("DisplayIcon") as string)))
+                key.GetValue("DisplayIcon") as string,
+                key.GetValue("UninstallString") as string)))
             .GroupBy(e => e.KeyName, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .ToList();
