@@ -7,6 +7,7 @@ public enum LibrarySectionKind
     All,
     Recent,
     Favorites,
+    Hidden,
     Collection,
     Store,
 }
@@ -22,12 +23,15 @@ public sealed record LibrarySection(
 public static class LibrarySections
 {
     /// <summary>
-    /// Tutti i giochi, giocati di recente, preferiti, una voce per collezione e una per store.
-    /// Le voci vuote vengono saltate, tranne "Tutti i giochi".
+    /// Tutti i giochi, giocati di recente, preferiti, nascosti, una voce per collezione e una per store.
+    /// Le voci vuote vengono saltate, tranne "Tutti i giochi". I giochi nascosti compaiono solo in "Nascosti",
+    /// a meno di <paramref name="showHiddenEverywhere"/>.
     /// </summary>
-    public static IReadOnlyList<LibrarySection> Build(IEnumerable<Game> games, IEnumerable<GameCollection> collections, int recentLimit = 12)
+    public static IReadOnlyList<LibrarySection> Build(IEnumerable<Game> games, IEnumerable<GameCollection> collections,
+        int recentLimit = 12, bool showHiddenEverywhere = false)
     {
-        var byName = games.OrderBy(g => g.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var all = games.OrderBy(g => g.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var byName = showHiddenEverywhere ? all : all.Where(g => !g.IsHidden).ToList();
 
         var sections = new List<LibrarySection>
         {
@@ -38,6 +42,7 @@ public static class LibrarySections
                 .Take(recentLimit)
                 .ToList()),
             new(LibrarySectionKind.Favorites, "favorites", byName.Where(g => g.IsFavorite).ToList()),
+            new(LibrarySectionKind.Hidden, "hidden", all.Where(g => g.IsHidden).ToList()),
         };
 
         sections.AddRange(collections

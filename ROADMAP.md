@@ -22,16 +22,20 @@ Layout scelto: barra laterale con le sezioni + griglia di copertine a 5 colonne,
 - Download delle copertine e degli sfondi in background (cache di Steam, CDN, SteamGridDB)
 
 **2b**
-- Pagina di dettaglio del gioco (hero, logo, ultima partita, azioni)
+- Pagina di dettaglio a tutto schermo: immagine orizzontale con logo, pulsanti, informazioni
+  (store, ultima partita, avvii dal launcher, collezioni, cartella)
+- Azioni: gioca, preferito, collezioni (aggiungi/togli, nuova collezione), nascondi/mostra
+- Sezione "Nascosti" nella barra laterale per far ricomparire i giochi nascosti
 
 **2c**
 - Impostazioni complete: chiave SteamGridDB, store attivi, giochi nascosti
-- Gestione collezioni e aggiunta manuale dei giochi, tastiera a schermo
+- Rinomina ed eliminazione delle collezioni, aggiunta manuale dei giochi, tastiera a schermo
 - Ricerca (tornerà con la tastiera a schermo)
 
 Rimandato: installer con aggiornamento automatico dalle release di GitHub (proposta: Velopack).
 
 ## Milestone 3 — Integrazione con il sistema
+- Tempo di gioco per tutti gli store (il launcher segue il processo del gioco)
 - Istanza singola: riaprire l'eseguibile (es. dal tasto MSI tramite ClawTweaks) riporta in primo piano il launcher
 - Resta in background mentre si gioca e torna in primo piano alla chiusura del gioco
 - Avvio come home della modalità a schermo intero di Windows tramite AnyFSE (eseguibile personalizzato)

@@ -6,11 +6,36 @@ namespace ClawHub.Core.Tests;
 public class LibrarySectionsTests
 {
     private static Game Game(string id, string name, GameStore store = GameStore.Steam, bool favorite = false,
-        DateTimeOffset? lastPlayed = null, params string[] collections) => new()
+        DateTimeOffset? lastPlayed = null, bool hidden = false, params string[] collections) => new()
     {
         Source = new DetectedGame { Store = store, StoreId = id, Name = name, Launch = LaunchInfo.FromUri($"test://{id}") },
-        UserData = new GameUserData { IsFavorite = favorite, LastPlayed = lastPlayed, CollectionIds = collections },
+        UserData = new GameUserData { IsFavorite = favorite, LastPlayed = lastPlayed, IsHidden = hidden, CollectionIds = collections },
     };
+
+    [Fact]
+    public void Build_PutsHiddenGamesOnlyInHiddenSection()
+    {
+        var games = new[] { Game("1", "Arma 3"), Game("2", "Minecraft", GameStore.Xbox, favorite: true, hidden: true) };
+
+        var sections = LibrarySections.Build(games, []);
+
+        // Il preferito nascosto non compare in "Preferiti", che resta vuota e viene saltata.
+        Assert.Equal(new[] { "all", "hidden", "store:Steam" }, sections.Select(s => s.Key));
+        Assert.Equal("Minecraft", Assert.Single(sections.Single(s => s.Kind == LibrarySectionKind.Hidden).Games).Name);
+        Assert.Equal("Arma 3", Assert.Single(sections[0].Games).Name);
+    }
+
+    [Fact]
+    public void Build_CanShowHiddenGamesEverywhere()
+    {
+        var games = new[] { Game("1", "Arma 3"), Game("2", "Minecraft", GameStore.Xbox, hidden: true) };
+
+        var sections = LibrarySections.Build(games, [], showHiddenEverywhere: true);
+
+        Assert.Equal(2, sections[0].Games.Count);
+        Assert.Contains(sections, s => s.Key == "store:Xbox");
+        Assert.Contains(sections, s => s.Kind == LibrarySectionKind.Hidden);
+    }
 
     [Fact]
     public void Build_OrdersSectionsAndSkipsEmptyOnes()

@@ -27,7 +27,9 @@ Decisioni prese:
   (eseguibile personalizzato), poi in modo nativo con un pacchetto MSIX con `windows.gamingApp` e la capability
   `Microsoft.appCategory.gamingHome` (stesso approccio di AnyFSE, licenza MIT, riutilizzabile citando l'autore).
 - **Interfaccia:** barra laterale con le sezioni + griglia di copertine 2:3 a 5 colonne, accento ciano, apertura su "Tutti i giochi".
-  Tasti: A dettaglio, X gioca, Y preferito, B indietro, LB/RB schede in alto. Anteprima di riferimento pubblicata come artifact "Claw Hub Home".
+  Tasti: A dettaglio, X gioca, Y preferito, B indietro, LB/RB **sempre** schede in alto (anche nel dettaglio).
+  Dettaglio a tutto schermo con gioca, preferito, collezioni, nascondi; i nascosti finiscono nella voce "Nascosti".
+  Tempo di gioco solo con la Milestone 3. Anteprima di riferimento pubblicata come artifact "Claw Hub Home".
 - Per ora **solo versione portable** (zip). Installer con aggiornamento automatico (Velopack) rimandato.
 - Copertine da SteamGridDB con la **chiave API inserita dall'utente** nelle impostazioni.
 - Lingue: **italiano e inglese** fin da subito, scelta nelle impostazioni e cambiabile senza riavvio (`src/ClawHub.Core/Localization/Strings/*.json`,

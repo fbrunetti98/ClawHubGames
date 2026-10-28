@@ -14,6 +14,10 @@ public sealed class GameTile(Game game)
 
     public ImageSource? Cover => ImageCache.Get(_artwork.Cover, 300);
 
+    public string? CoverPath => _artwork.Cover;
+    public string? HeroPath => _artwork.Hero;
+    public string? LogoPath => _artwork.Logo;
+
     /// <summary>Immagine per lo sfondo: quella orizzontale se c'è, altrimenti la copertina.</summary>
     public string? BackdropPath => _artwork.Hero ?? _artwork.Cover;
 }

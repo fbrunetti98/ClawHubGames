@@ -128,11 +128,12 @@ public sealed partial class MainWindow : Window
         var selectedSection = _sectionIndex < _sections.Count ? _sections[_sectionIndex].Key : "all";
         var selectedGame = CurrentTile?.Game.Id;
 
-        var visible = App.Library.Query(new LibraryQuery { IncludeHidden = App.Settings.ShowHiddenGames });
-        _sections = LibrarySections.Build(visible, App.Library.Collections);
+        _sections = LibrarySections.Build(App.Library.Games, App.Library.Collections, showHiddenEverywhere: App.Settings.ShowHiddenGames);
         _sectionIndex = Math.Max(0, IndexOf(_sections, s => s.Key == selectedSection));
         BuildSidebar();
         ShowSection(selectedGame);
+        RefreshDetail();
+        RefreshCollectionsPanel();
     }
 
     /// <summary>Mostra la sezione selezionata, mantenendo se possibile il gioco <paramref name="keepGameId"/>.</summary>
@@ -158,6 +159,12 @@ public sealed partial class MainWindow : Window
 
     private void Handle(PadButton button)
     {
+        // I pannelli aperti sopra la libreria hanno la precedenza; LB/RB cambiano sempre scheda.
+        if (HandleCollectionsPanel(button))
+            return;
+        if (button is not (PadButton.LeftShoulder or PadButton.RightShoulder or PadButton.Menu) && HandleDetail(button))
+            return;
+
         switch (button)
         {
             case PadButton.Up: Move(0, -1); break;
@@ -183,7 +190,7 @@ public sealed partial class MainWindow : Window
                 else if (_zone == Zone.Sidebar)
                     SetZone(Zone.Grid);
                 else if (CurrentTile is not null)
-                    ShowToast(App.Strings["Toast.DetailsSoon"]);
+                    OpenDetail();
                 break;
             case PadButton.X:
                 if (_tab == Tab.Library && CurrentTile is { } toLaunch)
@@ -257,7 +264,8 @@ public sealed partial class MainWindow : Window
     private void SwitchTab(Tab tab)
     {
         _tab = tab;
-        LibraryPanel.Visibility = tab == Tab.Library ? Visibility.Visible : Visibility.Collapsed;
+        LibraryPanel.Visibility = tab == Tab.Library && !_detailOpen ? Visibility.Visible : Visibility.Collapsed;
+        DetailPanel.Visibility = tab == Tab.Library && _detailOpen ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = tab == Tab.Settings ? Visibility.Visible : Visibility.Collapsed;
         BuildTabs();
         BuildLegend();
@@ -339,6 +347,17 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        if (_namingCollection)
+        {
+            // Mentre si scrive il nome di una collezione i tasti vanno alla casella di testo.
+            if (e.Key is VirtualKey.Enter or VirtualKey.Escape)
+            {
+                e.Handled = true;
+                Handle(e.Key == VirtualKey.Enter ? PadButton.A : PadButton.B);
+            }
+            return;
+        }
+
         // I tasti del controller (VirtualKey.Gamepad*) non sono qui: li legge GamepadInput.
         PadButton? button = e.Key switch
         {
@@ -398,6 +417,8 @@ public sealed partial class MainWindow : Window
         BuildSidebar();
         UpdateHeader();
         RefreshSettings();
+        RefreshDetail();
+        RefreshCollectionsPanel();
     }
 
     private void UpdateHeader()
@@ -610,7 +631,19 @@ public sealed partial class MainWindow : Window
     private void BuildLegend()
     {
         LegendPanel.Children.Clear();
-        if (_tab == Tab.Library)
+        if (_collectionsOpen)
+        {
+            LegendPanel.Children.Add(LegendItem("Hint.Select", Glyph("A")));
+            LegendPanel.Children.Add(LegendItem("Hint.Close", Glyph("B")));
+            return;
+        }
+        if (_tab == Tab.Library && _detailOpen)
+        {
+            LegendPanel.Children.Add(LegendItem("Hint.Confirm", Glyph("A")));
+            LegendPanel.Children.Add(LegendItem("Hint.Play", Glyph("X")));
+            LegendPanel.Children.Add(LegendItem("Hint.Favorite", Glyph("Y")));
+        }
+        else if (_tab == Tab.Library)
         {
             LegendPanel.Children.Add(LegendItem("Hint.Details", Glyph("A")));
             LegendPanel.Children.Add(LegendItem("Hint.Play", Glyph("X")));
@@ -638,7 +671,8 @@ public sealed partial class MainWindow : Window
         var details = ActionButton(Glyph("A"), App.Strings["Hint.Details"], primary: false);
         details.Tapped += (_, _) =>
         {
-            ShowToast(App.Strings["Toast.DetailsSoon"]);
+            if (CurrentTile is not null)
+                OpenDetail();
             KeySink.Focus(FocusState.Programmatic);
         };
 
@@ -806,6 +840,7 @@ public sealed partial class MainWindow : Window
         LibrarySectionKind.All => App.Strings["Library.AllGames"],
         LibrarySectionKind.Recent => App.Strings["Section.Recent"],
         LibrarySectionKind.Favorites => App.Strings["Library.Favorites"],
+        LibrarySectionKind.Hidden => App.Strings["Section.Hidden"],
         LibrarySectionKind.Collection => section.Collection?.Name ?? string.Empty,
         _ => App.Strings[$"Store.{section.Store}"],
     };

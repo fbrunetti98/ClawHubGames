@@ -139,6 +139,51 @@
                 </Grid>
             </Grid>
 
+            <!-- Dettaglio del gioco -->
+            <Grid x:Name="DetailPanel" Grid.Row="1" Visibility="Collapsed" Padding="36,10,36,0" RowSpacing="26">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="340" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Border CornerRadius="16" Background="{StaticResource PanelBrush}" />
+                    <Border CornerRadius="16">
+                        <Border.Background>
+                            <ImageBrush x:Name="DetailHeroBrush" Stretch="UniformToFill" AlignmentY="Top" />
+                        </Border.Background>
+                    </Border>
+                    <Border CornerRadius="16" IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                <GradientStop Color="#D905080F" Offset="0" />
+                                <GradientStop Color="#0005080F" Offset="0.6" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Image x:Name="DetailLogo" Stretch="Uniform" MaxHeight="150" MaxWidth="520"
+                           HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="34,0,0,28" />
+                    <TextBlock x:Name="DetailTitle" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="60"
+                               TextWrapping="WrapWholeWords" MaxLines="2" MaxWidth="720" LineHeight="58"
+                               HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="34,0,0,24" />
+                </Grid>
+
+                <StackPanel x:Name="DetailActions" Grid.Row="1" Orientation="Horizontal" Spacing="12" />
+
+                <Grid x:Name="DetailInfo" Grid.Row="2" ColumnSpacing="28" RowSpacing="16" VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                </Grid>
+            </Grid>
+
             <!-- Impostazioni -->
             <Grid x:Name="SettingsPanel" Grid.Row="1" Visibility="Collapsed" Padding="36,30,36,0">
                 <StackPanel MaxWidth="680" HorizontalAlignment="Left" Spacing="6">
@@ -153,6 +198,21 @@
             <Border Grid.Row="2" Background="#B305080F" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0">
                 <StackPanel x:Name="LegendPanel" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                             Spacing="22" Margin="0,0,36,0" />
+            </Border>
+        </Grid>
+
+        <!-- Collezioni del gioco, sopra a tutto -->
+        <Grid x:Name="CollectionsOverlay" Visibility="Collapsed" Background="#B305080F">
+            <Border Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    Background="{StaticResource Panel2Brush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="16">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Name="CollectionsTitle" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="24" />
+                    <TextBlock x:Name="CollectionsSubtitle" Foreground="{StaticResource MutedBrush}" FontSize="14" TextTrimming="CharacterEllipsis" />
+                    <ScrollViewer MaxHeight="360" VerticalScrollBarVisibility="Hidden">
+                        <StackPanel x:Name="CollectionsList" Spacing="4" />
+                    </ScrollViewer>
+                    <TextBox x:Name="NewCollectionBox" Visibility="Collapsed" FontSize="16" MaxLength="40" />
+                </StackPanel>
             </Border>
         </Grid>
 
