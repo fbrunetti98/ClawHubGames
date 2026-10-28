@@ -55,6 +55,24 @@ public sealed class LibraryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetArtwork_UpdatesSeveralGamesAndPersists()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+
+        await service.SetArtworkAsync(new Dictionary<string, ArtworkSet>
+        {
+            ["steam:1"] = new(Cover: @"C:\cache\1.jpg"),
+            ["epic:a"] = new(Hero: @"C:\cache\a.jpg"),
+        });
+
+        var reloaded = CreateService();
+        await reloaded.LoadAsync();
+        Assert.Equal(@"C:\cache\1.jpg", reloaded.Find("steam:1")!.UserData.Artwork.Cover);
+        Assert.Equal(@"C:\cache\a.jpg", reloaded.Find("epic:a")!.UserData.Artwork.Hero);
+    }
+
+    [Fact]
     public async Task Scan_SkipsDisabledStores()
     {
         var service = CreateService();

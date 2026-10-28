@@ -9,6 +9,23 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Palette: blu notte con accento ciano. -->
+            <Color x:Key="AccentColor">#FF22D3EE</Color>
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF22D3EE" />
+            <SolidColorBrush x:Key="AccentInkBrush" Color="#FF031318" />
+            <SolidColorBrush x:Key="BackgroundBrush" Color="#FF05080F" />
+            <SolidColorBrush x:Key="PanelBrush" Color="#FF0C1324" />
+            <SolidColorBrush x:Key="Panel2Brush" Color="#FF121B31" />
+            <SolidColorBrush x:Key="LineBrush" Color="#2296B4FF" />
+            <SolidColorBrush x:Key="TextBrush" Color="#FFE9EEFB" />
+            <SolidColorBrush x:Key="MutedBrush" Color="#FF8794B2" />
+            <SolidColorBrush x:Key="FaintBrush" Color="#FF5D6884" />
+            <SolidColorBrush x:Key="SelectedBrush" Color="#14FFFFFF" />
+
+            <!-- Caratteri inclusi in Windows: niente file da distribuire. -->
+            <FontFamily x:Key="DisplayFont">Bahnschrift</FontFamily>
+            <FontFamily x:Key="BodyFont">Segoe UI Variable Text, Segoe UI</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

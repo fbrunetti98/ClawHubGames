@@ -6,14 +6,17 @@ src/
     Models/           Game, DetectedGame, LaunchInfo, ArtworkSet, UserLibrary, AppSettings
     Abstractions/     ILibraryProvider (uno per store), IGameLauncher
     Parsing/          VDF/ACF di Steam, manifest Epic, installerdata.xml EA, codici Battle.net, title ID Rockstar
-    Services/         LibraryService (unione store + dati utente), ricerca
-    Artwork/          ArtworkService (cache locale), client SteamGridDB
+    Services/         LibraryService (unione store + dati utente), sezioni della barra laterale, ricerca
+    Artwork/          ArtworkService (cache locale), ArtworkUpdater (download in background), client SteamGridDB
     Localization/     Localizer + Strings/it.json, Strings/en.json
     Storage/          JsonFileStore (scrittura atomica), AppPaths
   ClawHub.Providers   net10.0-windows: registro, file system, PackageManager
     Stores/           Steam, Epic, GOG, Xbox, EA, Ubisoft, Battle.net, Rockstar
     Infrastructure/   RegistryReader, ShellGameLauncher
   ClawHub.App         WinUI 3 non pacchettizzata e autosufficiente
+    MainWindow        barra laterale + griglia; selezione e comandi gestiti in codice, non dal focus XAML
+    Views/            GameCard (copertina della griglia)
+    Input/            GamepadInput: legge il controller con Windows.Gaming.Input (solo con la finestra in primo piano)
 tests/
   ClawHub.Core.Tests  xUnit v3
 ```

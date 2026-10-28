@@ -1,18 +1,19 @@
 using ClawHub.Core.Models;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace ClawHub.App.ViewModels;
 
 /// <summary>Elemento della griglia della libreria.</summary>
 public sealed class GameTile(Game game)
 {
+    private readonly ArtworkSet _artwork = game.UserData.Artwork.Or(game.Source.KnownArtwork);
+
     public Game Game { get; } = game;
     public string Name => Game.Name;
-    public string StoreName => App.Strings[$"Store.{Game.Store}"];
+    public bool IsFavorite => Game.IsFavorite;
 
-    public ImageSource? Cover { get; } = CreateImage(game.UserData.Artwork.Or(game.Source.KnownArtwork).Cover);
+    public ImageSource? Cover => ImageCache.Get(_artwork.Cover, 300);
 
-    private static ImageSource? CreateImage(string? pathOrUrl) =>
-        Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var uri) ? new BitmapImage(uri) : null;
+    /// <summary>Immagine per lo sfondo: quella orizzontale se c'è, altrimenti la copertina.</summary>
+    public string? BackdropPath => _artwork.Hero ?? _artwork.Cover;
 }

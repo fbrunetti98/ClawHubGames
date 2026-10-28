@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="ClawHub.App.Views.GameCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="150"
+    Height="260">
+
+    <Grid RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="225" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Segnaposto con il titolo, visibile finché non c'è la copertina. -->
+        <Border CornerRadius="10" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1">
+            <TextBlock x:Name="FallbackTitle" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="17"
+                       TextWrapping="WrapWholeWords" VerticalAlignment="Bottom" Margin="12,0,12,14" />
+        </Border>
+        <Border CornerRadius="10">
+            <Border.Background>
+                <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill" />
+            </Border.Background>
+        </Border>
+        <TextBlock x:Name="FavoriteStar" Text="★" Foreground="#FFFFD166" FontSize="16"
+                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,9,0" />
+        <Border x:Name="FocusRing" CornerRadius="12" BorderThickness="3" BorderBrush="{StaticResource AccentBrush}"
+                Margin="-3" Opacity="0" />
+
+        <TextBlock x:Name="NameText" Grid.Row="1" FontSize="13" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>

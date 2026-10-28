@@ -140,6 +140,20 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
     public Task SetArtworkAsync(string gameId, ArtworkSet artwork) =>
         UpdateGameAsync(gameId, d => d with { Artwork = artwork });
 
+    /// <summary>Aggiorna le immagini di più giochi con un solo salvataggio.</summary>
+    public async Task SetArtworkAsync(IReadOnlyDictionary<string, ArtworkSet> artworkByGameId)
+    {
+        lock (_sync)
+        {
+            var games = new Dictionary<string, GameUserData>(_library.Games);
+            foreach (var (gameId, artwork) in artworkByGameId)
+                games[gameId] = (games.GetValueOrDefault(gameId) ?? GameUserData.Empty) with { Artwork = artwork };
+            _library = _library with { Games = games };
+            Rebuild();
+        }
+        await SaveAndNotifyAsync();
+    }
+
     public Task RecordLaunchAsync(string gameId, DateTimeOffset? when = null) =>
         UpdateGameAsync(gameId, d => d with { LastPlayed = when ?? DateTimeOffset.Now, PlayCount = d.PlayCount + 1 });
 

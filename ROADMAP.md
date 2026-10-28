@@ -11,13 +11,25 @@
 - App minima: griglia, ricerca, avvio
 
 ## Milestone 2 — Interfaccia "da divano"
-- Design definitivo ispirato a Big Picture (tema scuro, copertine grandi, righe orizzontali, sfondo dinamico)
-- Navigazione completa con il controller (Windows.Gaming.Input)
-- Home: giocati di recente, preferiti, collezioni, store
+Layout scelto: barra laterale con le sezioni + griglia di copertine a 5 colonne, accento ciano, apertura su "Tutti i giochi".
+
+**2a** (v0.2.0-alpha.1)
+- Schermo intero senza bordi (F11 per la finestra)
+- Barra laterale: tutti i giochi, continua a giocare, preferiti, collezioni, store
+- Griglia di copertine, sfondo del gioco selezionato in dissolvenza
+- Navigazione completa con controller (Windows.Gaming.Input) e tastiera; legenda dei tasti
+- Schede Libreria / Impostazioni con LB/RB; impostazioni minime: aggiorna libreria, lingua, schermo intero, esci
+- Download delle copertine e degli sfondi in background (cache di Steam, CDN, SteamGridDB)
+
+**2b**
 - Pagina di dettaglio del gioco (hero, logo, ultima partita, azioni)
-- Gestione collezioni e aggiunta manuale dei giochi dall'interfaccia
-- Impostazioni: lingua, chiave SteamGridDB, store attivi, giochi nascosti
-- Download delle copertine in background
+
+**2c**
+- Impostazioni complete: chiave SteamGridDB, store attivi, giochi nascosti
+- Gestione collezioni e aggiunta manuale dei giochi, tastiera a schermo
+- Ricerca (tornerà con la tastiera a schermo)
+
+Rimandato: installer con aggiornamento automatico dalle release di GitHub (proposta: Velopack).
 
 ## Milestone 3 — Integrazione con il sistema
 - Istanza singola: riaprire l'eseguibile (es. dal tasto MSI tramite ClawTweaks) riporta in primo piano il launcher

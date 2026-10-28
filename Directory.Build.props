@@ -7,7 +7,7 @@
     <!-- Permette di compilare i progetti Windows anche da macOS/Linux (solo controllo, non esecuzione). -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <!-- La versione viene sovrascritta dal workflow di release (tag vX.Y.Z). -->
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Fabio Brunetti</Authors>
     <Product>Claw Hub Games</Product>
     <Copyright>Copyright (c) 2026 Fabio Brunetti</Copyright>
