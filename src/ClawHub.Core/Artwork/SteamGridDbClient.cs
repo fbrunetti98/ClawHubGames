@@ -30,6 +30,23 @@ public sealed class SteamGridDbClient(HttpClient http, string apiKey)
         return null;
     }
 
+    /// <summary>
+    /// Controlla la chiave con una richiesta leggera. Falso se SteamGridDB la rifiuta;
+    /// gli errori di rete vengono rilanciati (la chiave potrebbe essere giusta).
+    /// </summary>
+    public async Task<bool> IsKeyValidAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var _ = await GetAsync("games/steam/220", cancellationToken);
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>URL della prima immagine disponibile del tipo richiesto, o null.</summary>
     public async Task<string?> GetImageUrlAsync(long gameId, ArtworkKind kind, CancellationToken cancellationToken = default)
     {

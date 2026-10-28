@@ -19,7 +19,7 @@ public partial class App : Application
         InitializeComponent();
     }
 
-    private static readonly HttpClient Http = CreateHttpClient();
+    internal static readonly HttpClient Http = CreateHttpClient();
 
     public static AppPaths Paths { get; } = AppPaths.Default;
     public static JsonFileStore<AppSettings> SettingsStore { get; } = new(Paths.SettingsFile);

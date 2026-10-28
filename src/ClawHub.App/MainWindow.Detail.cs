@@ -12,7 +12,7 @@ namespace ClawHub.App;
 // Pagina di dettaglio del gioco e pannello delle collezioni.
 public sealed partial class MainWindow
 {
-    private enum DetailAction { Play, Favorite, Collections, Hide }
+    private enum DetailAction { Play, Favorite, Collections, Hide, More }
 
     private static readonly DetailAction[] DetailActionsOrder = Enum.GetValues<DetailAction>();
 
@@ -20,14 +20,10 @@ public sealed partial class MainWindow
     private static readonly HashSet<string> FailedImages = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly List<Border> _detailButtons = [];
-    private readonly List<Border> _collectionRows = [];
     private bool _detailOpen;
     private string? _detailGameId;
     private int _detailButton;
     private string? _detailHeroPath;
-    private bool _collectionsOpen;
-    private bool _namingCollection;
-    private int _collectionIndex;
     private bool _detailImagesHooked;
 
     private Game? DetailGame => _detailGameId is null ? null : App.Library.Find(_detailGameId);
@@ -102,7 +98,10 @@ public sealed partial class MainWindow
                 await ToggleFavoriteAsync(tile);
                 break;
             case DetailAction.Collections:
-                OpenCollectionsPanel();
+                OpenGameCollectionsMenu(game.Id);
+                break;
+            case DetailAction.More:
+                OpenGameMoreMenu(game.Id);
                 break;
             case DetailAction.Hide:
                 var hide = !game.IsHidden;
@@ -165,7 +164,8 @@ public sealed partial class MainWindow
                 DetailAction.Play => App.Strings["Game.Play"],
                 DetailAction.Favorite => App.Strings[game.IsFavorite ? "Game.RemoveFavorite" : "Game.AddFavorite"],
                 DetailAction.Collections => App.Strings["Detail.Collections"],
-                _ => App.Strings[game.IsHidden ? "Game.Unhide" : "Game.Hide"],
+                DetailAction.Hide => App.Strings[game.IsHidden ? "Game.Unhide" : "Game.Hide"],
+                _ => App.Strings["Detail.More"],
             };
 
             var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12 };
@@ -211,7 +211,7 @@ public sealed partial class MainWindow
     {
         for (var i = 0; i < _detailButtons.Count; i++)
         {
-            var focused = i == _detailButton && !_collectionsOpen;
+            var focused = i == _detailButton && _menu is null && !Keyboard.IsOpen;
             _detailButtons[i].BorderBrush = focused ? Res<Brush>("TextBrush") : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
             _detailButtons[i].Scale = focused ? new System.Numerics.Vector3(1.04f, 1.04f, 1f) : System.Numerics.Vector3.One;
         }
@@ -295,162 +295,5 @@ public sealed partial class MainWindow
     {
         var relative = RelativeTime.Describe(when, DateTimeOffset.Now);
         return App.Strings.Format(relative.Key, relative.Value);
-    }
-
-    // ----- Collezioni -----
-
-    private void OpenCollectionsPanel()
-    {
-        _collectionsOpen = true;
-        _collectionIndex = 0;
-        CollectionsOverlay.Visibility = Visibility.Visible;
-        RefreshCollectionsPanel();
-        UpdateDetailButtons();
-        BuildLegend();
-    }
-
-    private void CloseCollectionsPanel()
-    {
-        StopNaming();
-        _collectionsOpen = false;
-        CollectionsOverlay.Visibility = Visibility.Collapsed;
-        UpdateDetailButtons();
-        BuildLegend();
-    }
-
-    private bool HandleCollectionsPanel(PadButton button)
-    {
-        if (!_collectionsOpen)
-            return false;
-
-        if (_namingCollection)
-        {
-            if (button == PadButton.A)
-                _ = CreateCollectionAsync();
-            else if (button == PadButton.B)
-                StopNaming();
-            return true;
-        }
-
-        switch (button)
-        {
-            case PadButton.Up:
-            case PadButton.Down:
-                _collectionIndex = Math.Clamp(_collectionIndex + (button == PadButton.Down ? 1 : -1), 0, _collectionRows.Count - 1);
-                UpdateCollectionRows();
-                break;
-            case PadButton.A:
-                _ = ActivateCollectionRowAsync(_collectionIndex);
-                break;
-            case PadButton.B:
-                CloseCollectionsPanel();
-                break;
-        }
-        return true;
-    }
-
-    private void RefreshCollectionsPanel()
-    {
-        if (!_collectionsOpen)
-            return;
-        if (DetailGame is not { } game)
-        {
-            CloseCollectionsPanel();
-            return;
-        }
-
-        CollectionsTitle.Text = App.Strings["Game.AddToCollection"].ToUpper(CultureInfo.CurrentCulture);
-        CollectionsSubtitle.Text = game.Name;
-        NewCollectionBox.PlaceholderText = App.Strings["Collection.NamePlaceholder"];
-
-        CollectionsList.Children.Clear();
-        _collectionRows.Clear();
-        foreach (var collection in App.Library.Collections)
-            AddCollectionRow(collection.Name, game.CollectionIds.Contains(collection.Id) ? "✓" : string.Empty);
-        AddCollectionRow("+  " + App.Strings["Collection.New"], string.Empty);
-
-        _collectionIndex = Math.Clamp(_collectionIndex, 0, _collectionRows.Count - 1);
-        UpdateCollectionRows();
-    }
-
-    private void AddCollectionRow(string title, string value)
-    {
-        var row = ListRow(title, value, 17);
-        row.Padding = new Thickness(16, 12, 16, 12);
-        var index = _collectionRows.Count;
-        row.Tapped += (_, _) =>
-        {
-            _collectionIndex = index;
-            UpdateCollectionRows();
-            _ = ActivateCollectionRowAsync(index);
-        };
-        _collectionRows.Add(row);
-        CollectionsList.Children.Add(row);
-    }
-
-    private void UpdateCollectionRows()
-    {
-        for (var i = 0; i < _collectionRows.Count; i++)
-            SetRowState(_collectionRows[i], i == _collectionIndex, focused: i == _collectionIndex && !_namingCollection);
-        if (_collectionIndex < _collectionRows.Count)
-            _collectionRows[_collectionIndex].StartBringIntoView();
-    }
-
-    private async Task ActivateCollectionRowAsync(int index)
-    {
-        if (DetailGame is not { } game)
-            return;
-
-        var collections = App.Library.Collections;
-        if (index >= collections.Count)
-        {
-            StartNaming();
-            return;
-        }
-
-        var collection = collections[index];
-        var inside = game.CollectionIds.Contains(collection.Id);
-        if (inside)
-            await App.Library.RemoveFromCollectionAsync(game.Id, collection.Id);
-        else
-            await App.Library.AddToCollectionAsync(game.Id, collection.Id);
-        ShowToast(App.Strings.Format(inside ? "Toast.RemovedFromCollection" : "Toast.AddedToCollection", game.Name, collection.Name));
-        RefreshCollectionsPanel();
-    }
-
-    /// <summary>Mostra la casella per il nome. Sul Claw, senza tastiera fisica, Windows apre la tastiera touch.</summary>
-    private void StartNaming()
-    {
-        _namingCollection = true;
-        NewCollectionBox.Text = string.Empty;
-        NewCollectionBox.Visibility = Visibility.Visible;
-        UpdateCollectionRows();
-        NewCollectionBox.Focus(FocusState.Programmatic);
-    }
-
-    private void StopNaming()
-    {
-        if (!_namingCollection)
-            return;
-        _namingCollection = false;
-        NewCollectionBox.Visibility = Visibility.Collapsed;
-        UpdateCollectionRows();
-        KeySink.Focus(FocusState.Programmatic);
-    }
-
-    private async Task CreateCollectionAsync()
-    {
-        if (DetailGame is not { } game)
-            return;
-
-        var name = NewCollectionBox.Text.Trim();
-        if (name.Length == 0)
-            name = App.Strings.Format("Collection.DefaultName", App.Library.Collections.Count + 1);
-
-        StopNaming();
-        var collection = await App.Library.CreateCollectionAsync(name);
-        await App.Library.AddToCollectionAsync(game.Id, collection.Id);
-        ShowToast(App.Strings.Format("Toast.CollectionCreated", collection.Name));
-        RefreshCollectionsPanel();
     }
 }

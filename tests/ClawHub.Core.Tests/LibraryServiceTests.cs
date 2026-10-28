@@ -73,6 +73,36 @@ public sealed class LibraryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task MoveCollection_ReordersAndKeepsOrderCompact()
+    {
+        var service = CreateService();
+        var a = await service.CreateCollectionAsync("A");
+        var b = await service.CreateCollectionAsync("B");
+        var c = await service.CreateCollectionAsync("C");
+
+        await service.MoveCollectionAsync(c.Id, -2);
+        await service.MoveCollectionAsync(a.Id, 5); // oltre la fine: va in fondo
+
+        Assert.Equal(new[] { "C", "B", "A" }, service.Collections.Select(x => x.Name));
+        Assert.Equal(new[] { 0, 1, 2 }, service.Collections.Select(x => x.Order));
+    }
+
+    [Fact]
+    public async Task ClearArtwork_ForgetsDownloadedImagesButKeepsFavorites()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        await service.SetFavoriteAsync("steam:1", true);
+        await service.SetArtworkAsync(new Dictionary<string, ArtworkSet> { ["steam:1"] = new(Cover: @"C:\cache\1.jpg") });
+
+        await service.ClearArtworkAsync();
+
+        var game = service.Find("steam:1")!;
+        Assert.Null(game.UserData.Artwork.Cover);
+        Assert.True(game.IsFavorite);
+    }
+
+    [Fact]
     public async Task Scan_SkipsDisabledStores()
     {
         var service = CreateService();

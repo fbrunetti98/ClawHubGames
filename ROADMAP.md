@@ -27,10 +27,14 @@ Layout scelto: barra laterale con le sezioni + griglia di copertine a 5 colonne,
 - Azioni: gioca, preferito, collezioni (aggiungi/togli, nuova collezione), nascondi/mostra
 - Sezione "Nascosti" nella barra laterale per far ricomparire i giochi nascosti
 
-**2c**
-- Impostazioni complete: chiave SteamGridDB, store attivi, giochi nascosti
-- Rinomina ed eliminazione delle collezioni, aggiunta manuale dei giochi, tastiera a schermo
-- Ricerca (tornerà con la tastiera a schermo)
+**2c** (chiude la milestone)
+- Tastiera a schermo per il controller (QWERTY, numeri, simboli; funziona anche con touch e tastiera fisica)
+- Ricerca con il tasto View (o F3 / Ctrl+F), risultati mentre si scrive
+- Impostazioni complete: chiave SteamGridDB con verifica, store da cercare, giochi nascosti ovunque,
+  scarica di nuovo le copertine, lingua, schermo intero
+- Gestione delle collezioni dalle impostazioni: rinomina, sposta, elimina
+- Aggiunta manuale dei giochi: programmi del menu Start oppure "Sfoglia…"
+- Menu "Altro" nel dettaglio: rinomina, ripristina il nome, rimuovi i giochi aggiunti a mano
 
 Rimandato: installer con aggiornamento automatico dalle release di GitHub (proposta: Velopack).
 

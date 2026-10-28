@@ -154,6 +154,20 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
         await SaveAndNotifyAsync();
     }
 
+    /// <summary>Dimentica le immagini scaricate di tutti i giochi, così vengono cercate di nuovo.</summary>
+    public async Task ClearArtworkAsync()
+    {
+        lock (_sync)
+        {
+            _library = _library with
+            {
+                Games = _library.Games.ToDictionary(kv => kv.Key, kv => kv.Value with { Artwork = ArtworkSet.Empty }),
+            };
+            Rebuild();
+        }
+        await SaveAndNotifyAsync();
+    }
+
     public Task RecordLaunchAsync(string gameId, DateTimeOffset? when = null) =>
         UpdateGameAsync(gameId, d => d with { LastPlayed = when ?? DateTimeOffset.Now, PlayCount = d.PlayCount + 1 });
 
@@ -180,6 +194,24 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
                     .Select(c => c.Id == collectionId ? c with { Name = RequireName(name) } : c)
                     .ToList(),
             };
+        }
+        await SaveAndNotifyAsync();
+    }
+
+    /// <summary>Sposta una collezione di <paramref name="offset"/> posizioni (negativo = verso l'alto).</summary>
+    public async Task MoveCollectionAsync(string collectionId, int offset)
+    {
+        lock (_sync)
+        {
+            var ordered = _library.Collections.OrderBy(c => c.Order).ToList();
+            var from = ordered.FindIndex(c => c.Id == collectionId);
+            if (from < 0)
+                return;
+            var to = Math.Clamp(from + offset, 0, ordered.Count - 1);
+            var moved = ordered[from];
+            ordered.RemoveAt(from);
+            ordered.Insert(to, moved);
+            _library = _library with { Collections = ordered.Select((c, i) => c with { Order = i }).ToList() };
         }
         await SaveAndNotifyAsync();
     }

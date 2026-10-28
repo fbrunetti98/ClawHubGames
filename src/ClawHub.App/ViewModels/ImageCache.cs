@@ -11,6 +11,9 @@ internal static class ImageCache
 {
     private static readonly Dictionary<string, BitmapImage> Images = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Dimentica le immagini caricate (es. dopo "scarica di nuovo le copertine").</summary>
+    public static void Clear() => Images.Clear();
+
     public static ImageSource? Get(string? pathOrUrl, int decodeWidth)
     {
         if (!Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var uri))

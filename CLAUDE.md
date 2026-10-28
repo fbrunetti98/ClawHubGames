@@ -29,6 +29,8 @@ Decisioni prese:
 - **Interfaccia:** barra laterale con le sezioni + griglia di copertine 2:3 a 5 colonne, accento ciano, apertura su "Tutti i giochi".
   Tasti: A dettaglio, X gioca, Y preferito, B indietro, LB/RB **sempre** schede in alto (anche nel dettaglio).
   Dettaglio a tutto schermo con gioca, preferito, collezioni, nascondi; i nascosti finiscono nella voce "Nascosti".
+  View apre la ricerca; tastiera a schermo QWERTY (A scrive, B cancella, X spazio, Y maiuscole, Menu conferma, View annulla).
+  Collezioni gestite da Impostazioni; giochi manuali dal menu Start o con "Sfoglia…"; "Altro" nel dettaglio per rinominare.
   Tempo di gioco solo con la Milestone 3. Anteprima di riferimento pubblicata come artifact "Claw Hub Home".
 - Per ora **solo versione portable** (zip). Installer con aggiornamento automatico (Velopack) rimandato.
 - Copertine da SteamGridDB con la **chiave API inserita dall'utente** nelle impostazioni.

@@ -19,13 +19,11 @@ public sealed partial class MainWindow : Window
 {
     private enum Tab { Library, Settings }
     private enum Zone { Sidebar, Grid }
-    private enum SettingsItem { Rescan, Language, FullScreen, Exit }
 
     private const int MaxColumns = 5;
     private const double CardWidth = 150;
     private const double CardHeight = 260;
     private const double CardSpacing = 26;
-    private static readonly string[] LanguageCycle = ["system", "it", "en"];
 
     private readonly GamepadInput _gamepad;
     private readonly DispatcherQueueTimer _clock;
@@ -119,8 +117,7 @@ public sealed partial class MainWindow : Window
         }
 
         // Copertine e sfondi mancanti, in background: compaiono man mano che arrivano.
-        var apiKey = App.Settings.SteamGridDbApiKey;
-        _ = Task.Run(() => App.Artwork.UpdateMissingAsync(apiKey));
+        StartArtworkUpdate();
     }
 
     private void Refresh()
@@ -133,7 +130,8 @@ public sealed partial class MainWindow : Window
         BuildSidebar();
         ShowSection(selectedGame);
         RefreshDetail();
-        RefreshCollectionsPanel();
+        RefreshMenu();
+        RefreshSettings();
     }
 
     /// <summary>Mostra la sezione selezionata, mantenendo se possibile il gioco <paramref name="keepGameId"/>.</summary>
@@ -142,13 +140,15 @@ public sealed partial class MainWindow : Window
         if (_sections.Count == 0)
             return;
 
-        _tiles = _sections[_sectionIndex].Games.Select(g => new GameTile(g)).ToList();
+        var games = _search is null ? _sections[_sectionIndex].Games : SearchResults();
+        _tiles = games.Select(g => new GameTile(g)).ToList();
         var kept = keepGameId is null ? -1 : _tiles.FindIndex(t => t.Game.Id == keepGameId);
         _gameIndex = kept >= 0 ? kept : Math.Clamp(_gameIndex, 0, Math.Max(0, _tiles.Count - 1));
-        if (_tiles.Count == 0)
+        if (_tiles.Count == 0 && _search is null)
             _zone = Zone.Sidebar;
 
         GamesRepeater.ItemsSource = _tiles;
+        EmptyText.Text = _search is null ? App.Strings["Library.Empty"] : App.Strings.Format("Search.NoResults", _search);
         EmptyText.Visibility = _tiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         UpdateSidebarHighlight();
         UpdateGridHighlight(scroll: true);
@@ -159,8 +159,13 @@ public sealed partial class MainWindow : Window
 
     private void Handle(PadButton button)
     {
-        // I pannelli aperti sopra la libreria hanno la precedenza; LB/RB cambiano sempre scheda.
-        if (HandleCollectionsPanel(button))
+        // Tastiera e menu sono modali; poi il dettaglio. Fuori da questi, LB/RB cambiano sempre scheda.
+        if (Keyboard.IsOpen)
+        {
+            Keyboard.Handle(button);
+            return;
+        }
+        if (HandleMenu(button))
             return;
         if (button is not (PadButton.LeftShoulder or PadButton.RightShoulder or PadButton.Menu) && HandleDetail(button))
             return;
@@ -178,15 +183,20 @@ public sealed partial class MainWindow : Window
             case PadButton.Menu:
                 SwitchTab(_tab == Tab.Settings ? Tab.Library : Tab.Settings);
                 break;
+            case PadButton.View:
+                StartSearch();
+                break;
             case PadButton.B:
                 if (_tab == Tab.Settings)
                     SwitchTab(Tab.Library);
+                else if (_search is not null)
+                    EndSearch();
                 else if (_zone == Zone.Grid)
                     SetZone(Zone.Sidebar);
                 break;
             case PadButton.A:
                 if (_tab == Tab.Settings)
-                    _ = ActivateSettingAsync((SettingsItem)_settingsIndex);
+                    _ = ActivateSettingAsync(_settingsIndex);
                 else if (_zone == Zone.Sidebar)
                     SetZone(Zone.Grid);
                 else if (CurrentTile is not null)
@@ -256,6 +266,8 @@ public sealed partial class MainWindow : Window
     {
         if (zone == Zone.Grid && _tiles.Count == 0)
             return;
+        if (zone == Zone.Sidebar && _search is not null)
+            EndSearch();
         _zone = zone;
         UpdateSidebarHighlight();
         UpdateGridHighlight(scroll: false);
@@ -295,30 +307,6 @@ public sealed partial class MainWindow : Window
         ShowToast(App.Strings.Format(favorite ? "Toast.FavoriteAdded" : "Toast.FavoriteRemoved", tile.Name));
     }
 
-    private async Task ActivateSettingAsync(SettingsItem item)
-    {
-        switch (item)
-        {
-            case SettingsItem.Rescan:
-                await RescanAsync(announce: true);
-                break;
-            case SettingsItem.Language:
-                var current = Array.IndexOf(LanguageCycle, App.Settings.Language);
-                var next = LanguageCycle[(current + 1) % LanguageCycle.Length];
-                App.Settings = App.Settings with { Language = next };
-                await App.SettingsStore.SaveAsync(App.Settings);
-                App.Strings.SetLanguage(next);
-                RefreshSettings(); // Se la lingua effettiva non cambia (es. sistema = italiano) LanguageChanged non scatta.
-                break;
-            case SettingsItem.FullScreen:
-                ToggleFullScreen();
-                break;
-            case SettingsItem.Exit:
-                Close();
-                break;
-        }
-    }
-
     private void ToggleFullScreen()
     {
         var isFullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
@@ -347,14 +335,24 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        if (_namingCollection)
+        if (Keyboard.IsOpen)
         {
-            // Mentre si scrive il nome di una collezione i tasti vanno alla casella di testo.
+            // Mentre la tastiera a schermo è aperta i tasti vanno alla casella di testo, tranne Invio ed Esc.
             if (e.Key is VirtualKey.Enter or VirtualKey.Escape)
             {
                 e.Handled = true;
-                Handle(e.Key == VirtualKey.Enter ? PadButton.A : PadButton.B);
+                if (e.Key == VirtualKey.Enter)
+                    Keyboard.Confirm();
+                else
+                    Keyboard.Cancel();
             }
+            return;
+        }
+
+        if (e.Key == VirtualKey.F3 || (e.Key == VirtualKey.F && IsControlDown()))
+        {
+            e.Handled = true;
+            Handle(PadButton.View);
             return;
         }
 
@@ -379,6 +377,10 @@ public sealed partial class MainWindow : Window
         e.Handled = true;
         Handle(button.Value);
     }
+
+    private static bool IsControlDown() =>
+        Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control)
+            .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
 
     private void OnGridTapped(object sender, TappedRoutedEventArgs e)
     {
@@ -408,7 +410,7 @@ public sealed partial class MainWindow : Window
     {
         Title = App.Strings["App.Title"];
         SettingsTitle.Text = App.Strings["Nav.Settings"].ToUpper(CultureInfo.CurrentCulture);
-        SettingsNote.Text = App.Strings["Settings.ComingSoon"];
+        SettingsNote.Text = App.Strings["Settings.SteamGridDbKey.Help"];
         VersionText.Text = App.Strings.Format("Settings.Version", AppVersion());
         EmptyText.Text = App.Strings["Library.Empty"];
         BuildTabs();
@@ -418,7 +420,8 @@ public sealed partial class MainWindow : Window
         UpdateHeader();
         RefreshSettings();
         RefreshDetail();
-        RefreshCollectionsPanel();
+        RefreshMenu();
+        RefreshSettings();
     }
 
     private void UpdateHeader()
@@ -427,7 +430,8 @@ public sealed partial class MainWindow : Window
             return;
 
         var section = _sections[_sectionIndex];
-        SectionLabel.Text = $"{SectionName(section).ToUpper(CultureInfo.CurrentCulture)} · {section.Games.Count}";
+        var label = _search is null ? SectionName(section) : App.Strings.Format("Search.Results", _search);
+        SectionLabel.Text = $"{label.ToUpper(CultureInfo.CurrentCulture)} · {_tiles.Count}";
 
         if (CurrentTile is not { } tile)
         {
@@ -541,47 +545,6 @@ public sealed partial class MainWindow : Window
             _sidebarRows[_sectionIndex].StartBringIntoView();
     }
 
-    private void RefreshSettings()
-    {
-        SettingsItems.Children.Clear();
-        _settingsRows.Clear();
-
-        var language = App.Settings.Language == "system" ? "Settings.Language.System" : $"Settings.Language.{App.Settings.Language}";
-        var fullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
-        (string Title, string Value)[] items =
-        [
-            (App.Strings["Library.Rescan"], _scanning
-                ? App.Strings["Library.Scanning"]
-                : App.Strings.Format("Library.ScanDone", App.Library.Games.Count)),
-            (App.Strings["Settings.Language"], App.Strings[language]),
-            (App.Strings["Settings.Fullscreen"], App.Strings[fullScreen ? "Settings.On" : "Settings.Off"]),
-            (App.Strings["Settings.Exit"], string.Empty),
-        ];
-
-        for (var i = 0; i < items.Length; i++)
-        {
-            var index = i;
-            var row = ListRow(items[i].Title, items[i].Value, 18);
-            row.Padding = new Thickness(18, 14, 18, 14);
-            row.Tapped += (_, _) =>
-            {
-                _settingsIndex = index;
-                UpdateSettingsHighlight();
-                _ = ActivateSettingAsync((SettingsItem)index);
-                KeySink.Focus(FocusState.Programmatic);
-            };
-            _settingsRows.Add(row);
-            SettingsItems.Children.Add(row);
-        }
-        UpdateSettingsHighlight();
-    }
-
-    private void UpdateSettingsHighlight()
-    {
-        for (var i = 0; i < _settingsRows.Count; i++)
-            SetRowState(_settingsRows[i], i == _settingsIndex, focused: i == _settingsIndex && _tab == Tab.Settings);
-    }
-
     private void BuildTabs()
     {
         TabsPanel.Children.Clear();
@@ -631,10 +594,20 @@ public sealed partial class MainWindow : Window
     private void BuildLegend()
     {
         LegendPanel.Children.Clear();
-        if (_collectionsOpen)
+        if (Keyboard.IsOpen)
         {
             LegendPanel.Children.Add(LegendItem("Hint.Select", Glyph("A")));
-            LegendPanel.Children.Add(LegendItem("Hint.Close", Glyph("B")));
+            LegendPanel.Children.Add(LegendItem("Hint.Backspace", Glyph("B")));
+            LegendPanel.Children.Add(LegendItem("Hint.Space", Glyph("X")));
+            LegendPanel.Children.Add(LegendItem("Hint.Shift", Glyph("Y")));
+            LegendPanel.Children.Add(LegendItem("Hint.Done", ShoulderGlyph("MENU")));
+            LegendPanel.Children.Add(LegendItem("Hint.Cancel", ShoulderGlyph("VIEW")));
+            return;
+        }
+        if (_menu is not null)
+        {
+            LegendPanel.Children.Add(LegendItem("Hint.Select", Glyph("A")));
+            LegendPanel.Children.Add(LegendItem("Hint.Back", Glyph("B")));
             return;
         }
         if (_tab == Tab.Library && _detailOpen)
@@ -648,6 +621,7 @@ public sealed partial class MainWindow : Window
             LegendPanel.Children.Add(LegendItem("Hint.Details", Glyph("A")));
             LegendPanel.Children.Add(LegendItem("Hint.Play", Glyph("X")));
             LegendPanel.Children.Add(LegendItem("Hint.Favorite", Glyph("Y")));
+            LegendPanel.Children.Add(LegendItem("Hint.Search", ShoulderGlyph("VIEW")));
         }
         else
         {

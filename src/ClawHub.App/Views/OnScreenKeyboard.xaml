@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="ClawHub.App.Views.OnScreenKeyboard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border Background="{StaticResource Panel2Brush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,16,0,18">
+        <StackPanel Spacing="12" HorizontalAlignment="Center" Width="760">
+            <TextBlock x:Name="TitleText" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="16" CharacterSpacing="120"
+                       Foreground="{StaticResource MutedBrush}" />
+            <!-- Casella vera: accetta anche tastiera fisica, touch e incolla. -->
+            <TextBox x:Name="Input" FontSize="18" PreventKeyboardDisplayOnProgrammaticFocus="True" />
+            <StackPanel x:Name="Rows" Spacing="6" />
+        </StackPanel>
+    </Border>
+</UserControl>

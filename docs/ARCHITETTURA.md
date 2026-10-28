@@ -15,8 +15,11 @@ src/
     Infrastructure/   RegistryReader, ShellGameLauncher
   ClawHub.App         WinUI 3 non pacchettizzata e autosufficiente
     MainWindow        barra laterale + griglia; selezione e comandi gestiti in codice, non dal focus XAML
-    MainWindow.Detail pagina di dettaglio del gioco e pannello delle collezioni
-    Views/            GameCard (copertina della griglia)
+    MainWindow.Detail pagina di dettaglio del gioco
+    MainWindow.Menu   menu sopra l'interfaccia (collezioni, aggiungi gioco, altro) e richiesta di testo
+    MainWindow.Search ricerca con la tastiera a schermo
+    MainWindow.Settings scheda Impostazioni
+    Views/            GameCard (copertina della griglia), OnScreenKeyboard (tastiera per il controller)
     Input/            GamepadInput: legge il controller con Windows.Gaming.Input (solo con la finestra in primo piano)
 tests/
   ClawHub.Core.Tests  xUnit v3
