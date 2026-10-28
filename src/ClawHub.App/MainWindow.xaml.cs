@@ -572,9 +572,7 @@ public sealed partial class MainWindow : Window
             {
                 CornerRadius = new CornerRadius(999),
                 Padding = new Thickness(14, 8, 14, 8),
-                Background = active ? Res<Brush>("SelectedBrush") : null,
-                BorderBrush = Res<Brush>("AccentBrush"),
-                BorderThickness = new Thickness(0, 0, 0, active ? 2 : 0),
+                Background = active ? ActiveTabBackground() : null,
                 Child = new TextBlock
                 {
                     Text = App.Strings[tab == Tab.Library ? "Nav.Library" : "Nav.Settings"],
@@ -591,6 +589,22 @@ public sealed partial class MainWindow : Window
             TabsPanel.Children.Add(label);
         }
         TabsPanel.Children.Add(Badge("RB"));
+    }
+
+    /// <summary>
+    /// Fondo della scheda attiva con una fascia ciano in basso. Un bordo solo inferiore su una pillola
+    /// verrebbe disegnato come un arco staccato; lo sfondo invece segue gli angoli arrotondati.
+    /// </summary>
+    private static LinearGradientBrush ActiveTabBackground()
+    {
+        var fill = ((SolidColorBrush)Res<Brush>("SelectedBrush")).Color;
+        var accent = (Windows.UI.Color)Application.Current.Resources["AccentColor"];
+        var brush = new LinearGradientBrush { StartPoint = new Windows.Foundation.Point(0, 0), EndPoint = new Windows.Foundation.Point(0, 1) };
+        brush.GradientStops.Add(new GradientStop { Color = fill, Offset = 0 });
+        brush.GradientStops.Add(new GradientStop { Color = fill, Offset = 0.94 });
+        brush.GradientStops.Add(new GradientStop { Color = accent, Offset = 0.94 });
+        brush.GradientStops.Add(new GradientStop { Color = accent, Offset = 1 });
+        return brush;
     }
 
     private void BuildLegend()
