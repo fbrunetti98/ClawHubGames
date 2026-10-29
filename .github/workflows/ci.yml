@@ -31,6 +31,6 @@ jobs:
         run: |
           dotnet tool install -g vpk --version 1.2.161
           $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
-          vpk pack --packId ClawHubGamesApp --packVersion 0.0.0-ci --packDir publish/win-x64 --mainExe ClawHubGames.exe `
+          vpk pack --packId ClawHubGamesApp --packVersion 0.0.1-ci --packDir publish/win-x64 --mainExe ClawHubGames.exe `
             --packTitle "Claw Hub Games" --channel win-x64 --runtime win-x64 --outputDir velopack-check --noPortable
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
