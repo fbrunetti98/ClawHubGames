@@ -204,12 +204,12 @@ public sealed partial class OnScreenKeyboard : UserControl
         {
             var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = KeyGap, HorizontalAlignment = HorizontalAlignment.Center };
             var keys = new List<(string, Border, double)>();
-            var rowWidth = rows[r].Sum(k => Width(k)) + KeyGap * (rows[r].Length - 1);
+            var rowWidth = rows[r].Sum(k => KeyWidth(k)) + KeyGap * (rows[r].Length - 1);
             var x = -rowWidth / 2;
             for (var c = 0; c < rows[r].Length; c++)
             {
                 var key = rows[r][c];
-                var width = Width(key);
+                var width = KeyWidth(key);
                 var view = KeyView(key, width);
                 var row = r;
                 var column = c;
@@ -276,7 +276,7 @@ public sealed partial class OnScreenKeyboard : UserControl
         }
     }
 
-    private static double Width(string key) => key switch
+    private static double KeyWidth(string key) => key switch
     {
         Space => KeyUnit * 5 + KeyGap * 4,
         Done => KeyUnit * 2 + KeyGap,

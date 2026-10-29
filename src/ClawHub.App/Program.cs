@@ -37,7 +37,7 @@ public static class Program
         { IsBackground = true, Name = "Attivazione da un'altra istanza" }.Start();
 
         WinRT.ComWrappersSupport.InitializeComWrappers();
-        Application.Start(_ =>
+        Application.Start(callbackParams =>
         {
             SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));
             _ = new App();
