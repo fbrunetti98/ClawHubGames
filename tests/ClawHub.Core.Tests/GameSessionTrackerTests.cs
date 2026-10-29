@@ -31,7 +31,7 @@ public class GameSessionTrackerTests
         var firstMiss = tracker.Update(Games, [], T0.AddMinutes(31));
         var end = tracker.Update(Games, [], T0.AddMinutes(32));
 
-        Assert.Equal("titanfall", Assert.Single(start.Started).GameId);
+        Assert.Equal("steam:titanfall", Assert.Single(start.Started).GameId);
         Assert.True(firstMiss.IsEmpty); // Un controllo senza processi non basta: il gioco potrebbe riavviarsi.
         var ended = Assert.Single(end.Ended);
         Assert.Equal(TimeSpan.FromMinutes(30), ended.Duration);
@@ -47,7 +47,7 @@ public class GameSessionTrackerTests
         var changes = tracker.Update(Games, [new RunningProcess(2, @"C:\Program Files\Rockstar Games\Grand Theft Auto V Enhanced\GTA5_Enhanced.exe")], T0.AddSeconds(30));
 
         Assert.True(changes.IsEmpty);
-        Assert.Equal(new[] { 2 }, tracker.Find("gta")!.ProcessIds);
+        Assert.Equal(new[] { 2 }, tracker.Find("rockstar:gta")!.ProcessIds);
     }
 
     [Fact]
