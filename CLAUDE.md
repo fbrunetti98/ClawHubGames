@@ -32,7 +32,10 @@ Decisioni prese:
   View apre la ricerca; tastiera a schermo QWERTY (A scrive, B cancella, X spazio, Y maiuscole, Menu conferma, View annulla).
   Collezioni gestite da Impostazioni; giochi manuali dal menu Start o con "Sfoglia…"; "Altro" nel dettaglio per rinominare.
   Tempo di gioco solo con la Milestone 3. Anteprima di riferimento pubblicata come artifact "Claw Hub Home".
-- Per ora **solo versione portable** (zip). Installer con aggiornamento automatico (Velopack) rimandato.
+- **Installer Velopack** (solo x64, packId `ClawHubGamesApp`, installato in `%LocalAppData%\ClawHubGamesApp`) con aggiornamenti
+  automatici dalle release di GitHub; resta anche lo zip portable. I dati utente restano in `%LocalAppData%\ClawHubGames`.
+- **Milestone 3:** tasto MSI apre/chiude il launcher, riduzione a icona durante il gioco e ritorno automatico,
+  tempo di gioco anche per i giochi avviati fuori dal launcher, menu "In gioco" con chiudi gioco, avvia con Windows.
 - Copertine da SteamGridDB con la **chiave API inserita dall'utente** nelle impostazioni.
 - Lingue: **italiano e inglese** fin da subito, scelta nelle impostazioni e cambiabile senza riavvio (`src/ClawHub.Core/Localization/Strings/*.json`,
   le chiavi devono essere identiche in tutte le lingue: c'è un test).

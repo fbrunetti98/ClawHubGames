@@ -60,6 +60,23 @@ jobs:
             Compress-Archive -Path "publish/$rid/*" -DestinationPath "ClawHubGames-$full-$rid.zip"
           }
 
+      - name: Installer and updates (Velopack, x64)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $full = "${{ steps.version.outputs.full }}"
+          dotnet tool install -g vpk --version 1.2.161
+          $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
+          $out = "releases/win-x64"
+          # L'ultima release serve per creare l'aggiornamento "delta" (solo le differenze). La prima volta non c'è.
+          vpk download github --repoUrl "https://github.com/${{ github.repository }}" --channel win-x64 --outputDir $out --token $env:GH_TOKEN --pre
+          if ($LASTEXITCODE -ne 0) { Write-Host "Nessuna release Velopack precedente: niente delta"; $global:LASTEXITCODE = 0 }
+          vpk pack --packId ClawHubGamesApp --packVersion $full --packDir publish/win-x64 --mainExe ClawHubGames.exe `
+            --packTitle "Claw Hub Games" --packAuthors "Fabio Brunetti" --channel win-x64 --runtime win-x64 --outputDir $out --noPortable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem $out
+
       - name: Create GitHub release
         shell: pwsh
         env:
@@ -69,4 +86,10 @@ jobs:
           # --target serve solo all'avvio manuale, quando il tag non esiste ancora.
           $flags = @('--generate-notes', '--title', "Claw Hub Games $tag", '--target', '${{ github.sha }}')
           if ($tag.Contains('-')) { $flags += '--prerelease' }
-          gh release create $tag (Get-ChildItem ClawHubGames-*.zip).FullName @flags
+          # Zip portable + Setup e pacchetti Velopack di questa versione (non quelli scaricati della precedente).
+          $full = "${{ steps.version.outputs.full }}"
+          $assets = @((Get-ChildItem ClawHubGames-*.zip).FullName)
+          $assets += Get-ChildItem releases/win-x64 -File |
+            Where-Object { $_.Extension -ne '.nupkg' -or $_.Name -like "*$full*" } |
+            ForEach-Object { $_.FullName }
+          gh release create $tag $assets @flags

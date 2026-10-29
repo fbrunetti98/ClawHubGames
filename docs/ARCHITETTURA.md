@@ -8,17 +8,21 @@ src/
     Parsing/          VDF/ACF di Steam, manifest Epic, installerdata.xml EA, codici Battle.net, title ID Rockstar
     Services/         LibraryService (unione store + dati utente), sezioni della barra laterale, ricerca
     Artwork/          ArtworkService (cache locale), ArtworkUpdater (download in background), client SteamGridDB
+    Sessions/         GameSessionTracker: partite riconosciute dai processi nella cartella del gioco
     Localization/     Localizer + Strings/it.json, Strings/en.json
     Storage/          JsonFileStore (scrittura atomica), AppPaths
   ClawHub.Providers   net10.0-windows: registro, file system, PackageManager
     Stores/           Steam, Epic, GOG, Xbox, EA, Ubisoft, Battle.net, Rockstar
-    Infrastructure/   RegistryReader, ShellGameLauncher
+    Infrastructure/   RegistryReader, ShellGameLauncher, RunningProcesses, StartMenuShortcuts
   ClawHub.App         WinUI 3 non pacchettizzata e autosufficiente
     MainWindow        barra laterale + griglia; selezione e comandi gestiti in codice, non dal focus XAML
     MainWindow.Detail pagina di dettaglio del gioco
     MainWindow.Menu   menu sopra l'interfaccia (collezioni, aggiungi gioco, altro) e richiesta di testo
     MainWindow.Search ricerca con la tastiera a schermo
     MainWindow.Settings scheda Impostazioni
+    MainWindow.Session partite in corso, launcher in background, tasto MSI, aggiornamenti
+    Program.cs        avvio: Velopack, istanza singola (mutex + evento per riattivare la finestra già aperta)
+    Services/         AppUpdater (Velopack + GitHub), Autostart
     Views/            GameCard (copertina della griglia), OnScreenKeyboard (tastiera per il controller)
     Input/            GamepadInput: legge il controller con Windows.Gaming.Input (solo con la finestra in primo piano)
 tests/

@@ -38,12 +38,16 @@ Layout scelto: barra laterale con le sezioni + griglia di copertine a 5 colonne,
 
 Rimandato: installer con aggiornamento automatico dalle release di GitHub (proposta: Velopack).
 
-## Milestone 3 — Integrazione con il sistema
-- Tempo di gioco per tutti gli store (il launcher segue il processo del gioco)
-- Istanza singola: riaprire l'eseguibile (es. dal tasto MSI tramite ClawTweaks) riporta in primo piano il launcher
-- Resta in background mentre si gioca e torna in primo piano alla chiusura del gioco
-- Avvio come home della modalità a schermo intero di Windows tramite AnyFSE (eseguibile personalizzato)
-- Installer
+## Milestone 3 — Integrazione con il sistema (v0.3.0-alpha.1)
+- Istanza singola: riaprire l'exe (tasto MSI tramite ClawTweaks, AnyFSE, menu Start) porta in primo piano il launcher;
+  se è già davanti e c'è un gioco aperto, si torna al gioco
+- Dopo l'avvio di un gioco il launcher si riduce a icona e si mette in pausa; quando il gioco si chiude torna in primo piano
+- Partite riconosciute dai processi che girano dalla cartella del gioco, anche se avviati fuori dal launcher:
+  tempo di gioco e ultima partita reali
+- Etichetta e menu "In gioco": torna al gioco, chiudi il gioco (con conferma), resta nel launcher
+- Avvia con Windows (impostazione, spenta di partenza)
+- Installer Velopack (x64) con aggiornamenti automatici dalle release di GitHub, opzione "Ricevi versioni di anteprima"
+- Avvio come home della modalità a schermo intero tramite AnyFSE (già verificato)
 
 ## Milestone 4 — Home nativa della modalità a schermo intero
 - Pacchetto MSIX con estensione `windows.gamingApp` e capability `gamingHome` (approccio di AnyFSE, licenza MIT)

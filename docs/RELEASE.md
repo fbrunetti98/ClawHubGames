@@ -15,5 +15,11 @@ dalle sessioni cloud di Claude Code, che non possono inviare tag.
 
 Un tag con trattino (es. `v0.2.0-beta.1`) viene pubblicato come **pre-release**.
 
-L'app non è pacchettizzata: si estrae lo zip e si avvia `ClawHubGames.exe`. Il runtime .NET e il Windows App SDK
+Per x64 il workflow crea anche l'installer con [Velopack](https://velopack.io):
+`ClawHubGamesApp-win-x64-Setup.exe` più i pacchetti `.nupkg` e `releases.win-x64.json` che servono agli
+aggiornamenti automatici. L'app installata (in `%LocalAppData%\ClawHubGamesApp`) controlla le release di GitHub
+all'avvio e ogni 6 ore; le pre-release solo se l'opzione "Ricevi versioni di anteprima" è attiva.
+I dati dell'utente restano in `%LocalAppData%\ClawHubGames` e non vengono toccati da installazione o disinstallazione.
+
+Versione portable: si estrae lo zip e si avvia `ClawHubGames.exe` (non si aggiorna da sola). Il runtime .NET e il Windows App SDK
 sono inclusi, non serve installare altro.

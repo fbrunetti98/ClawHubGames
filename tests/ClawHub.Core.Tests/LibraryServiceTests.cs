@@ -103,6 +103,21 @@ public sealed class LibraryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task RecordSession_AddsPlayTimeAndUpdatesLastPlayed()
+    {
+        var service = CreateService();
+        await service.ScanAsync();
+        var start = new DateTimeOffset(2026, 10, 29, 20, 0, 0, TimeSpan.Zero);
+
+        await service.RecordSessionAsync("steam:1", start, TimeSpan.FromMinutes(45));
+        await service.RecordSessionAsync("steam:1", start.AddDays(1), TimeSpan.FromMinutes(15));
+
+        var game = service.Find("steam:1")!;
+        Assert.Equal(TimeSpan.FromHours(1), game.PlayTime);
+        Assert.Equal(start.AddDays(1).AddMinutes(15), game.LastPlayed);
+    }
+
+    [Fact]
     public async Task Scan_SkipsDisabledStores()
     {
         var service = CreateService();

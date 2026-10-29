@@ -1,4 +1,5 @@
 using System.Globalization;
+using ClawHub.App.Services;
 using ClawHub.App.ViewModels;
 using ClawHub.Core.Artwork;
 using ClawHub.Core.Models;
@@ -53,9 +54,20 @@ public sealed partial class MainWindow
         foreach (var store in Enum.GetValues<GameStore>().Where(s => s != GameStore.Manual))
             AddSetting(App.Strings[$"Store.{store}"], OnOff(!App.Settings.DisabledStores.Contains(store)), () => ToggleStoreAsync(store));
 
+        AddSettingsGroup("Settings.Group.Updates");
+        AddSetting(App.Strings["Settings.CheckUpdates"], UpdateStatusText(), RunUpdateSettingAsync);
+        AddSetting(App.Strings["Settings.ReceivePreviews"], OnOff(App.Settings.ReceivePreviewUpdates), () =>
+            SaveSettingsAsync(App.Settings with { ReceivePreviewUpdates = !App.Settings.ReceivePreviewUpdates }));
+
         AddSettingsGroup("Settings.Group.System");
         var language = App.Settings.Language == "system" ? "Settings.Language.System" : $"Settings.Language.{App.Settings.Language}";
         AddSetting(App.Strings["Settings.Language"], App.Strings[language], CycleLanguageAsync);
+        AddSetting(App.Strings["Settings.Autostart"], OnOff(Autostart.IsEnabled), () =>
+        {
+            Autostart.Set(!Autostart.IsEnabled);
+            RefreshSettings();
+            return Task.CompletedTask;
+        });
         AddSetting(App.Strings["Settings.Fullscreen"], OnOff(AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen), () =>
         {
             ToggleFullScreen();

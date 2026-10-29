@@ -234,9 +234,10 @@ public sealed partial class MainWindow
 
         AddInfo(0, 0, "Detail.Store", App.Strings[$"Store.{game.Store}"]);
         AddInfo(0, 1, "Detail.LastPlayed", lastPlayed);
-        AddInfo(1, 0, "Detail.Launches", launches);
-        AddInfo(1, 1, "Detail.Collections", collections.Count == 0 ? App.Strings["Detail.NoCollections"] : string.Join(", ", collections));
-        AddInfo(2, 0, "Detail.Folder", game.Source.InstallDirectory ?? App.Strings["Detail.Unknown"], monospace: true, span: 2);
+        AddInfo(1, 0, "Detail.PlayTime", game.PlayTime > TimeSpan.Zero ? FormatPlayTime(game.PlayTime) : App.Strings["PlayTime.None"]);
+        AddInfo(1, 1, "Detail.Launches", launches);
+        AddInfo(2, 0, "Detail.Collections", collections.Count == 0 ? App.Strings["Detail.NoCollections"] : string.Join(", ", collections), span: 2);
+        AddInfo(3, 0, "Detail.Folder", game.Source.InstallDirectory ?? App.Strings["Detail.Unknown"], monospace: true, span: 2);
     }
 
     private void AddInfo(int row, int column, string labelKey, string value, bool monospace = false, int span = 1)

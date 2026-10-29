@@ -13,4 +13,7 @@ public sealed record AppSettings
 
     /// <summary>Mostra i giochi nascosti nella libreria.</summary>
     public bool ShowHiddenGames { get; init; }
+
+    /// <summary>Aggiornamenti automatici anche verso le versioni di anteprima (alpha/beta).</summary>
+    public bool ReceivePreviewUpdates { get; init; } = true;
 }

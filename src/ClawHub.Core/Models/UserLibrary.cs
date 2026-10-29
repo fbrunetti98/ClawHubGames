@@ -10,6 +10,9 @@ public sealed record GameUserData
     public string? CustomName { get; init; }
     public DateTimeOffset? LastPlayed { get; init; }
     public int PlayCount { get; init; }
+
+    /// <summary>Tempo di gioco misurato dal launcher (partite avviate da qualsiasi parte), in secondi.</summary>
+    public long PlayTimeSeconds { get; init; }
     public IReadOnlyCollection<string> CollectionIds { get; init; } = [];
 
     /// <summary>Immagini scelte o scaricate per questo gioco; hanno la precedenza su quelle dello store.</summary>

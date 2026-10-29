@@ -24,3 +24,13 @@ jobs:
       - name: Check published files
         shell: pwsh
         run: .github/scripts/Test-PublishOutput.ps1 -Path publish/win-x64
+
+      # Prova del pacchetto Velopack, così un errore si vede prima della release.
+      - name: Velopack pack (check)
+        shell: pwsh
+        run: |
+          dotnet tool install -g vpk --version 1.2.161
+          $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
+          vpk pack --packId ClawHubGamesApp --packVersion 0.0.0-ci --packDir publish/win-x64 --mainExe ClawHubGames.exe `
+            --packTitle "Claw Hub Games" --channel win-x64 --runtime win-x64 --outputDir velopack-check --noPortable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -171,6 +171,14 @@ public sealed class LibraryService(IEnumerable<ILibraryProvider> providers, Json
     public Task RecordLaunchAsync(string gameId, DateTimeOffset? when = null) =>
         UpdateGameAsync(gameId, d => d with { LastPlayed = when ?? DateTimeOffset.Now, PlayCount = d.PlayCount + 1 });
 
+    /// <summary>Somma una partita finita al tempo di gioco e aggiorna l'ultima partita.</summary>
+    public Task RecordSessionAsync(string gameId, DateTimeOffset started, TimeSpan duration) =>
+        UpdateGameAsync(gameId, d => d with
+        {
+            PlayTimeSeconds = d.PlayTimeSeconds + (long)Math.Max(0, duration.TotalSeconds),
+            LastPlayed = d.LastPlayed is { } last && last > started + duration ? last : started + duration,
+        });
+
     public async Task<GameCollection> CreateCollectionAsync(string name)
     {
         GameCollection collection;

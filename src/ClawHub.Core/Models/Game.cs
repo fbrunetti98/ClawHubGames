@@ -36,6 +36,7 @@ public sealed record Game
     public bool IsHidden => UserData.IsHidden;
     public IReadOnlyCollection<string> CollectionIds => UserData.CollectionIds;
     public DateTimeOffset? LastPlayed => Max(UserData.LastPlayed, Source.StoreLastPlayed);
+    public TimeSpan PlayTime => TimeSpan.FromSeconds(UserData.PlayTimeSeconds);
 
     private static DateTimeOffset? Max(DateTimeOffset? a, DateTimeOffset? b) =>
         a is null ? b : b is null ? a : (a > b ? a : b);

@@ -74,8 +74,15 @@ public sealed partial class MainWindow : Window
             _refreshDebounce.Start();
         });
 
+        InGameChip.Tapped += (_, _) =>
+        {
+            if (_menu is null && !Keyboard.IsOpen)
+                OpenInGameMenu();
+        };
+
         ApplyStrings();
         UpdateClock();
+        StartBackgroundServices();
         _ = LoadAsync();
     }
 
@@ -132,6 +139,7 @@ public sealed partial class MainWindow : Window
         RefreshDetail();
         RefreshMenu();
         RefreshSettings();
+        UpdateInGameChip();
     }
 
     /// <summary>Mostra la sezione selezionata, mantenendo se possibile il gioco <paramref name="keepGameId"/>.</summary>
@@ -293,6 +301,7 @@ public sealed partial class MainWindow : Window
             ShowToast(App.Strings.Format("Toast.Launching", tile.Name));
             await App.Launcher.LaunchAsync(tile.Game.Source.Launch);
             await App.Library.RecordLaunchAsync(tile.Game.Id);
+            OnGameLaunched(tile.Game.Id);
         }
         catch (Exception ex)
         {
@@ -422,6 +431,7 @@ public sealed partial class MainWindow : Window
         RefreshDetail();
         RefreshMenu();
         RefreshSettings();
+        UpdateInGameChip();
     }
 
     private void UpdateHeader()
@@ -443,7 +453,10 @@ public sealed partial class MainWindow : Window
         }
 
         GameTitle.Text = tile.Name.ToUpper(CultureInfo.CurrentCulture);
-        GameMeta.Text = $"{App.Strings[$"Store.{tile.Game.Store}"]}    ·    {LastPlayedText(tile.Game)}";
+        var meta = $"{App.Strings[$"Store.{tile.Game.Store}"]}    ·    {LastPlayedText(tile.Game)}";
+        if (tile.Game.PlayTime > TimeSpan.Zero)
+            meta += $"    ·    {FormatPlayTime(tile.Game.PlayTime)}";
+        GameMeta.Text = meta;
         GameActions.Visibility = Visibility.Visible;
         SetBackdrop(tile.BackdropPath);
     }
